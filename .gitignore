@@ -1,0 +1,10 @@
+.vscode/
+bin/
+build/
+__pycache__/
+
+*.o
+*.s
+
+SLUS_21678/
+context/
