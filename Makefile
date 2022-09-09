@@ -14,7 +14,7 @@ WERROR ?= 0
 # Check code syntax with host compiler
 RUN_CC_CHECK ?= 1
 # Dump build object files
-OBJDUMP_BUILD ?= 0
+OBJDUMP_BUILD ?= 1
 # Number of threads to disassmble, extract, and compress with
 # N_THREADS ?= $(shell nproc)
 
@@ -33,11 +33,39 @@ endif
 ### Output ###
 
 BUILD_DIR := build
-# ROM       := $(BUILD_DIR)/$(TARGET).z64
-ELF       := $(BUILD_DIR)/$(TARGET).elf
-LD_SCRIPT := $(BUILD_DIR)/$(TARGET).ld
-LD_MAP    := $(BUILD_DIR)/$(TARGET).map
+# ROM       := build/$(TARGET).z64
+ELF       := build/$(TARGET).elf
+LD_SCRIPT := build/$(TARGET).ld
+LD_MAP    := build/$(TARGET).map
 
+
+### Compiler Options ###
+
+ASFLAGS      := -G 0 -I include -EL -mtune=r5900 -march=r5900
+# CFLAGS       := -G 0 -non_shared -Xfullwarn -Xcpluscomm -Wab,-r4300_mul
+CPPFLAGS     := -P -I include
+LDFLAGS      := -T undefined_syms.txt -T build/auto/undefined_syms_auto.txt -T build/auto/undefined_funcs_auto.txt -T undefined_funcs.txt -T $(LD_SCRIPT) -Map $(LD_MAP) --no-check-sections
+# OPTFLAGS     := -O2
+
+IINC       := -Iinclude -Isrc -Iassets -Ibuild -I.
+
+ifeq ($(KEEP_MDEBUG),0)
+  RM_MDEBUG = $(OBJCOPY) --remove-section .mdebug $@
+else
+  RM_MDEBUG = @:
+endif
+
+# Check code syntax with host compiler
+ifneq ($(RUN_CC_CHECK),0)
+    CHECK_WARNINGS ?= -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-label
+    CHECK_WARNINGS += -Wno-unused-parameter -Wno-unused-variable
+    CC_CHECK       := clang -fno-builtin -fsyntax-only -fdiagnostics-color -D NON_MATCHING $(IINC) -nostdinc $(CHECK_WARNINGS)
+    ifneq ($(WERROR), 0)
+        CC_CHECK += -Werror
+    endif
+else
+    CC_CHECK := @:
+endif
 
 ### Tools ###
 
@@ -50,6 +78,8 @@ else
     endif
     ifeq ($(UNAME_S),Darwin)
         OS = macos
+        MAKE=gmake
+        CPPFLAGS += -xc++
     endif
 endif
 
@@ -65,12 +95,21 @@ OBJCOPY  := $(CROSS)objcopy
 STRIP    := $(CROSS)strip
 
 # CC       := tools/ido_recomp/$(OS)/7.1/cc
-CC_HOST  := clang
-CPP      := cpp -P
+CPP      := cpp
 
+# Use relocations and abi fpr names in the dump
+OBJDUMP_FLAGS := --disassemble --reloc --disassemble-zeroes -Mreg-names=32
+
+ifneq ($(OBJDUMP_BUILD), 0)
+  OBJDUMP_CMD = $(OBJDUMP) $(OBJDUMP_FLAGS) $@ > $(@:.o=.s)
+  OBJCOPY_BIN = $(OBJCOPY) -O binary $@ $@.bin
+else
+  OBJDUMP_CMD = @:
+  OBJCOPY_BIN = @:
+endif
 
 # create asm directories
-$(shell mkdir -p asm $(BUILD_DIR)/auto)
+$(shell mkdir -p asm build/auto)
 
 
 ### Targets ###
@@ -90,6 +129,20 @@ setup: split
 
 split:
 	$(SPLAT) $(SPLAT_YAML)
+
+
+# Assemble .s files with modern gnu as
+build/asm/%.o: asm/%.s
+	@mkdir -p $(shell dirname $@)
+	$(AS) $(ASFLAGS) -o $@ $<
+	$(OBJDUMP_CMD)
+
+build/assets/%.o: assets/%.c
+	@mkdir -p $(shell dirname $@)
+	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTFLAGS) -o $@ $<
+	$(OBJCOPY_BIN)
+	$(RM_MDEBUG)
+
 
 ### Make Settings ###
 
