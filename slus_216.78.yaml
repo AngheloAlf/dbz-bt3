@@ -1,0 +1,120 @@
+name: Dragon Ball Z Budokai Tenkaichi 3
+sha1: 6f9bafdbf1a908d9396a2e7a673dccc8ce4604b4
+options:
+  # basename: 
+  target_path: SLUS_21678/slus_216.78
+  ld_script_path: build/slus_216.78.ld
+  # compiler: 
+  mnemonic_ljust: 11
+  find_file_boundaries: False
+  # header_encoding: ASCII
+  platform: ps2
+  undefined_funcs_auto: True
+  undefined_funcs_auto_path: build/auto/undefined_funcs_auto.txt
+  undefined_syms_auto: True
+  undefined_syms_auto_path: build/auto/undefined_syms_auto.txt
+  symbol_addrs_path: symbol_addrs.txt
+  undefined_syms_path: undefined_syms.txt
+  asm_path: asm
+  # src_path: src
+  build_path: build
+  # extensions_path: tools/splat_ext
+  mips_abi_float_regs: o32
+  # section_order: [".text", ".data", ".rodata", ".bss"]
+  # auto_all_sections: [".data", ".rodata", ".bss"]
+segments:
+  - [0x0, bin]
+  - name: main_text
+    type: code
+    start: 0x1000
+    vram: 0x100000
+    subsegments:
+      - [0x1000, asm]
+  - name: main_vutext
+    type: code
+    start: 0x1c06b0
+    vram: 0x2bf6b0
+    subsegments:
+      - [0x1c06b0, asm]
+  - name: main_text_nop
+    type: code
+    start: 0x1c4380
+    vram: 0x2c3380
+    subsegments:
+      - [0x1c4380, asm]
+  - name: main_ctors
+    type: code
+    start: 0x1c4388
+    vram: 0x2c3388
+    subsegments:
+      - [0x1c4388, asm]
+  - name: main_dtors
+    type: code
+    start: 0x1c4398
+    vram: 0x2c3398
+    subsegments:
+      - [0x1c4398, asm]
+  - [0x1c43a8, bin]
+  - name: main_data
+    type: code
+    start: 0x1c4400
+    vram: 0x2c3400
+    subsegments:
+      - [0x1c4400, data]
+  - name: main_vudata
+    type: code
+    start: 0x1ec35c
+    vram: 0x2eb35c
+    subsegments:
+      - [0x1ec35c, data]
+  - name: main_rodata
+    type: code
+    start: 0x1ec380
+    vram: 0x2eb35c
+    subsegments:
+      - [0x1ec380, rodata]
+  - [0x1fd280, bin]
+  - [0x204864]
+
+# There are 33 section headers, starting at offset 0x20433c:
+
+# Section Headers:
+#   [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+#   [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+#   [ 1] .text             PROGBITS        00100000 001000 1bf6b0 00  AX  0   0 64
+#   [ 2] .vutext           PROGBITS        002bf6b0 1c06b0 003cd0 00  AX  0   0 16
+#   [ 3] .text_nop         PROGBITS        002c3380 1c4380 000008 00  WA  0   0  1
+#   [ 4] .ctors            PROGBITS        002c3388 1c4388 000010 00  WA  0   0  4
+#   [ 5] .dtors            PROGBITS        002c3398 1c4398 000010 00  WA  0   0  4
+#   [ 6] .reginfo          MIPS_REGINFO    002c33a8 1c43a8 000018 01   A  0   0  4
+#   [ 7] .data             PROGBITS        002c3400 1c4400 027f54 00  WA  0   0 64
+#   [ 8] .eh_frame         PROGBITS        002eb358 1ec358 000004 00  WA  0   0  8
+#   [ 9] .vudata           PROGBITS        002eb35c 1ec35c 000000 00  WA  0   0  1
+#   [10] .rodata           PROGBITS        002eb380 1ec380 010efe 00   A  0   0 16
+#   [11] .lit4             PROGBITS        002fc280 1fd280 0025a0 00 WAp  0   0  4
+#   [12] .sdata            PROGBITS        002fe880 1ff880 0008ee 00 WAp  0   0  8
+#   [13] .sbss             NOBITS          002ff180 200180 000098 00 WAp  0   0  8
+#   [14] .scommon          NOBITS          002ff280 2001e8 000018 00  WA  0   0  4
+#   [15] .bss              NOBITS          002ff300 200250 0358f8 00  WA  0   0 64
+#   [16] .vubss            NOBITS          00334bf8 200250 000000 00  WA  0   0  1
+#   [17] .mdebug.eabi64    PROGBITS        00000000 200250 000000 00      0   0  1
+#   [18] .DVP.ovlytab      LOPROC+0xffff42 00000000 200250 000090 0c   W 19   0  4
+#   [19] .DVP.ovlystrtab   STRTAB          00000000 2002e0 0001ae 00   W  0   0  1
+#   [20] .DVP.overlay[...] LOPROC+0xffff42 00000000 20048e 0003f8 00  WX  0   0  1
+#   [21] .DVP.overlay[...] LOPROC+0xffff42 00000000 200886 0003e0 00  WX  0   0  1
+#   [22] .DVP.overlay[...] LOPROC+0xffff42 00000000 200c66 000318 00  WX  0   0  1
+#   [23] .DVP.overlay[...] LOPROC+0xffff42 00000000 200f7e 000328 00  WX  0   0  1
+#   [24] .DVP.overlay[...] LOPROC+0xffff42 00000000 2012a6 000800 00  WX  0   0  1
+#   [25] .DVP.overlay[...] LOPROC+0xffff42 00000000 201aa6 000478 00  WX  0   0  1
+#   [26] .DVP.overlay[...] LOPROC+0xffff42 00000000 201f1e 000800 00  WX  0   0  1
+#   [27] .DVP.overlay[...] LOPROC+0xffff42 00000000 20271e 000568 00  WX  0   0  1
+#   [28] .DVP.overlay[...] LOPROC+0xffff42 00000000 202c86 000800 00  WX  0   0  1
+#   [29] .DVP.overlay[...] LOPROC+0xffff42 00000000 203486 000618 00  WX  0   0  1
+#   [30] .DVP.overlay[...] LOPROC+0xffff42 00000000 203a9e 000340 00  WX  0   0  1
+#   [31] .DVP.overlay[...] LOPROC+0xffff42 00000000 203dde 0002f0 00  WX  0   0  1
+#   [32] .shstrtab         STRTAB          00000000 2040ce 00026b 00      0   0  1
+# Key to Flags:
+#   W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+#   L (link order), O (extra OS processing required), G (group), T (TLS),
+#   C (compressed), x (unknown), o (OS specific), E (exclude),
+#   D (mbind), p (processor specific)

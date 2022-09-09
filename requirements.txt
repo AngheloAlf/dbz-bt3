@@ -1,0 +1,10 @@
+# For splat 0.9.0
+PyYAML
+pylibyaml
+pypng
+colorama
+spimdisasm>=1.4.1
+rabbitizer
+pygfxd
+tqdm
+intervaltree

@@ -1,10 +1,16 @@
 .vscode/
 bin/
+assets/
 build/
 __pycache__/
+.make_options
 
 *.o
 *.s
 
-SLUS_21678/
+SLUS_21678/*
+!SLUS_21678/.gitkeep
 context/
+
+# Remove when splat has merged support for PS2
+tools/splat/
