@@ -44,7 +44,7 @@ LD_MAP    := build/$(TARGET).map
 ASFLAGS      := -G 0 -I include -EL -mtune=r5900 -march=r5900
 # CFLAGS       := -G 0 -non_shared -Xfullwarn -Xcpluscomm -Wab,-r4300_mul
 CPPFLAGS     := -P -I include
-LDFLAGS      := -T undefined_syms.txt -T build/auto/undefined_syms_auto.txt -T build/auto/undefined_funcs_auto.txt -T undefined_funcs.txt -T $(LD_SCRIPT) -Map $(LD_MAP) --no-check-sections
+LDFLAGS      := -EL --no-check-sections --accept-unknown-input-arch --emit-relocs
 # OPTFLAGS     := -O2
 
 IINC       := -Iinclude -Isrc -Iassets -Ibuild -I.
@@ -57,30 +57,30 @@ endif
 
 # Check code syntax with host compiler
 ifneq ($(RUN_CC_CHECK),0)
-    CHECK_WARNINGS ?= -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-label
-    CHECK_WARNINGS += -Wno-unused-parameter -Wno-unused-variable
-    CC_CHECK       := clang -fno-builtin -fsyntax-only -fdiagnostics-color -D NON_MATCHING $(IINC) -nostdinc $(CHECK_WARNINGS)
-    ifneq ($(WERROR), 0)
-        CC_CHECK += -Werror
-    endif
+	CHECK_WARNINGS ?= -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-label
+	CHECK_WARNINGS += -Wno-unused-parameter -Wno-unused-variable
+	CC_CHECK       := clang -fno-builtin -fsyntax-only -fdiagnostics-color -D NON_MATCHING $(IINC) -nostdinc $(CHECK_WARNINGS)
+	ifneq ($(WERROR), 0)
+		CC_CHECK += -Werror
+	endif
 else
-    CC_CHECK := @:
+	CC_CHECK := @:
 endif
 
 ### Tools ###
 
 ifeq ($(OS),Windows_NT)
-    OS = windows
+	OS = windows
 else
-    UNAME_S := $(shell uname -s)
-    ifeq ($(UNAME_S),Linux)
-        OS = linux
-    endif
-    ifeq ($(UNAME_S),Darwin)
-        OS = macos
-        MAKE=gmake
-        CPPFLAGS += -xc++
-    endif
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Linux)
+		OS = linux
+	endif
+	ifeq ($(UNAME_S),Darwin)
+		OS = macos
+		MAKE=gmake
+		CPPFLAGS += -xc++
+	endif
 endif
 
 PYTHON     ?= python3
@@ -109,8 +109,19 @@ else
 endif
 
 # create asm directories
-$(shell mkdir -p asm build/auto)
+$(shell mkdir -p asm bin build/auto)
 
+
+# SRC_DIRS		:= $(shell find src -type d)
+ASM_DIRS		:= $(shell find asm -type d)
+BIN_DIRS		:= $(shell find bin -type d)
+
+C_FILES			:= $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
+S_FILES			:= $(foreach dir,$(ASM_DIRS),$(wildcard $(dir)/*.s))
+BIN_FILES		:= $(foreach dir,$(BIN_DIRS),$(wildcard $(dir)/*.bin))
+O_FILES       	:= $(foreach f,$(C_FILES:.c=.c.o),build/$f) \
+                   $(foreach f,$(S_FILES:.s=.s.o),build/$f) \
+                   $(foreach f,$(BIN_FILES:.bin=.bin.o),build/$f) \
 
 ### Targets ###
 
@@ -123,7 +134,7 @@ clean:
 
 distclean: clean
 	$(RM) -rf asm
-	$(RM) -rf assets
+	$(RM) -rf bin
 
 setup: split
 
@@ -131,17 +142,30 @@ split:
 	$(SPLAT) $(SPLAT_YAML)
 
 
+$(ELF): $(O_FILES) $(LD_SCRIPT) build/undefined_syms.txt build/undefined_funcs.txt
+	$(LD) $(LDFLAGS) -T build/undefined_syms.txt -T build/undefined_funcs.txt -T build/auto/undefined_syms_auto.txt -T build/auto/undefined_funcs_auto.txt -T $(LD_SCRIPT) -Map $(LD_MAP) -o $@
+
+
+build/undefined_syms.txt: undefined_syms.txt
+	$(CPP) $(CPPFLAGS) $< > $@
+build/undefined_funcs.txt: undefined_funcs.txt
+	$(CPP) $(CPPFLAGS) $< > $@
+
 # Assemble .s files with modern gnu as
-build/asm/%.o: asm/%.s
+build/asm/%.s.o: asm/%.s
 	@mkdir -p $(shell dirname $@)
 	$(AS) $(ASFLAGS) -o $@ $<
 	$(OBJDUMP_CMD)
 
-build/assets/%.o: assets/%.c
+build/assets/%.c.o: assets/%.c
 	@mkdir -p $(shell dirname $@)
 	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTFLAGS) -o $@ $<
 	$(OBJCOPY_BIN)
 	$(RM_MDEBUG)
+
+build/%.bin.o: %.bin
+	@mkdir -p $(shell dirname $@)
+	$(OBJCOPY) -I binary -O elf32-little $< $@
 
 
 ### Make Settings ###

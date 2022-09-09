@@ -9,6 +9,7 @@ options:
   find_file_boundaries: False
   # header_encoding: ASCII
   platform: ps2
+  base_path: .
   undefined_funcs_auto: True
   undefined_funcs_auto_path: build/auto/undefined_funcs_auto.txt
   undefined_syms_auto: True
@@ -18,6 +19,7 @@ options:
   asm_path: asm
   # src_path: src
   build_path: build
+  asset_path: bin
   # extensions_path: tools/splat_ext
   mips_abi_float_regs: o32
   # section_order: [".text", ".data", ".rodata", ".bss"]
@@ -70,7 +72,7 @@ segments:
   - name: main_rodata
     type: code
     start: 0x1ec380
-    vram: 0x2eb35c
+    vram: 0x2eb380
     subsegments:
       - [0x1ec380, rodata]
   - [0x1fd280, bin]
