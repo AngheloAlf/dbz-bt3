@@ -3,7 +3,7 @@ PyYAML
 pylibyaml
 pypng
 colorama
-spimdisasm>=1.4.1
+spimdisasm>=1.4.2
 rabbitizer
 pygfxd
 tqdm
