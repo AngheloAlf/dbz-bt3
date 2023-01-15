@@ -1,81 +1,50 @@
 name: Dragon Ball Z Budokai Tenkaichi 3
 sha1: 6f9bafdbf1a908d9396a2e7a673dccc8ce4604b4
 options:
-  # basename: 
+  basename: .
   target_path: SLUS_21678/slus_216.78
   ld_script_path: build/slus_216.78.ld
-  # compiler: 
+  compiler: GCC
   mnemonic_ljust: 11
   find_file_boundaries: False
   # header_encoding: ASCII
   platform: ps2
   base_path: .
-  undefined_funcs_auto: True
   undefined_funcs_auto_path: build/auto/undefined_funcs_auto.txt
-  undefined_syms_auto: True
   undefined_syms_auto_path: build/auto/undefined_syms_auto.txt
   symbol_addrs_path: symbol_addrs.txt
-  undefined_syms_path: undefined_syms.txt
-  asm_path: asm
+  asm_path: asm/slus_216.78
   # src_path: src
   build_path: build
   asset_path: bin
   # extensions_path: tools/splat_ext
+  # mips_abi_gpr: n32
+  # mips_abi_float_regs: n32
   mips_abi_float_regs: o32
   # section_order: [".text", ".data", ".rodata", ".bss"]
   # auto_all_sections: [".data", ".rodata", ".bss"]
 segments:
   - [0x0, bin]
-  - name: main_text
+  - name: main
     type: code
-    start: 0x1000
+    start: 0x001000
     vram: 0x100000
     subsegments:
-      - [0x1000, asm]
-  - name: main_vutext
-    type: code
-    start: 0x1c06b0
-    vram: 0x2bf6b0
-    subsegments:
-      - [0x1c06b0, asm]
-  - name: main_text_nop
-    type: code
-    start: 0x1c4380
-    vram: 0x2c3380
-    subsegments:
-      - [0x1c4380, asm]
-  - name: main_ctors
-    type: code
-    start: 0x1c4388
-    vram: 0x2c3388
-    subsegments:
-      - [0x1c4388, asm]
-  - name: main_dtors
-    type: code
-    start: 0x1c4398
-    vram: 0x2c3398
-    subsegments:
-      - [0x1c4398, asm]
-  - [0x1c43a8, bin]
-  - name: main_data
-    type: code
-    start: 0x1c4400
-    vram: 0x2c3400
-    subsegments:
-      - [0x1c4400, data]
-  - name: main_vudata
-    type: code
-    start: 0x1ec35c
-    vram: 0x2eb35c
-    subsegments:
-      - [0x1ec35c, data]
-  - name: main_rodata
-    type: code
-    start: 0x1ec380
-    vram: 0x2eb380
-    subsegments:
-      - [0x1ec380, rodata]
-  - [0x1fd280, bin]
+      - [0x001000, asm, main_text/001000]
+      - [0x1C06B0, asm, main_vutext/1C06B0]
+      - [0x1C4380, asm, main_text_nop/1C4380]
+      - [0x1C4388, asm, main_ctors/1C4388]
+      - [0x1C4398, asm, main_dtors/1C4398]
+      - [0x1c43a8, bin] # reginfo
+      - [0x1C4400, data, main_data/1C4400]
+      - [0x1EC35C, data, main_vudata/1EC35C]
+      - [0x1EC380, rodata, main_rodata/1EC380]
+      - [0x1fd280, bin]
+      - { start: 0x200180, type: bss, vram: 0x002ff180, name: main_sbss/002ff180 } # sbss
+      - { start: 0x2001e8, type: bss, vram: 0x002ff280, name: main_scommon/002ff280 } # scommon
+      - { start: 0x200250, type: bss, vram: 0x002ff300, name: main_bss/002ff300 } # bss
+      - { start: 0x200250, type: bss, vram: 0x00334bf8, name: main_vubss/00334bf8 } # vubss
+  - [0x200250, bin]
   - [0x204864]
 
 # There are 33 section headers, starting at offset 0x20433c:

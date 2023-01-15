@@ -85,7 +85,7 @@ endif
 
 PYTHON     ?= python3
 SPLAT_YAML ?= slus_216.78.yaml
-SPLAT      ?= $(PYTHON) tools/splat/split.py $(SPLAT_YAML)
+SPLAT      ?= tools/splat/split.py
 
 CROSS    := mips-linux-gnu-
 AS       := $(CROSS)as
@@ -138,8 +138,9 @@ distclean: clean
 
 setup: split
 
-split:
-	$(SPLAT) $(SPLAT_YAML)
+extract:
+	$(RM) -rf asm
+	$(PYTHON) $(SPLAT) $(SPLAT_YAML)
 
 
 $(ELF): $(O_FILES) $(LD_SCRIPT) build/undefined_syms.txt build/undefined_funcs.txt
